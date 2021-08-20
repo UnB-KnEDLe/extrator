@@ -16,7 +16,7 @@ Requirements
 Installing MuPDF
 ================
 
-MuPDF is the main engine used to parse pdf files on DODFMiner. Its installation is essencial for proper work.
+MuPDF is the main engine used to parse PDF files on DODFMiner. Its installation is essencial for proper work.
 
 macOS
 -----
@@ -53,7 +53,7 @@ From The Python Package Index (PyPI)::
 From Github::
 
     git clone https://github.com/UnB-KnEDLe/DODFMiner.git
-    cd dodfminer
+    cd cd DODFMiner/
     pip install -e .
 
 
