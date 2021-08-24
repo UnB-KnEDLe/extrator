@@ -21,6 +21,7 @@ from dodfminer.extract.polished.acts.abono import AbonoPermanencia
 from dodfminer.extract.polished.acts.substituicao import Substituicao
 from dodfminer.extract.polished.acts.cessoes import Cessoes
 from dodfminer.extract.polished.acts.sem_efeito_aposentadoria import SemEfeitoAposentadoria
+from dodfminer.extract.polished.acts.contract import Contracts
 from dodfminer.extract.polished.create_xml import XMLFy
 
 
@@ -34,7 +35,8 @@ _acts_ids = {"aposentadoria": Retirements,
              "efetivos_nome": NomeacaoEfetivos,
              "efetivos_exo": ExoneracaoEfetivos,
              "sem_efeito_aposentadoria": SemEfeitoAposentadoria,
-             "cessoes": Cessoes}
+             "cessoes": Cessoes,
+             "contratos": Contracts}
 
 """_acts_ids: All avaiable acts classes indexed by a given string name."""
 
