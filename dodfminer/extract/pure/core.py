@@ -17,13 +17,14 @@ Usage example::
 import os
 import json
 import unicodedata
+import numpy as np
 
 from pathlib import Path
 
 import fitz
 
 from dodfminer.extract.pure.utils.title_extractor import ExtractorTitleSubtitle
-from dodfminer.extract.pure.utils.box_extractor import get_doc_text_boxes
+from dodfminer.extract.pure.utils.box_extractor import get_doc_text_boxes 
 
 RESULTS_PATH = "results/"
 RESULTS_PATH_JSON = "results/json"
@@ -95,18 +96,30 @@ class ContentExtractor:
         drawboxes_text = ''
         list_of_boxes = []
         pymu_file = fitz.open(file)
-        for textboxes in get_doc_text_boxes(pymu_file):
-            for text in textboxes:
-                if int(text[1]) != 55 and int(text[1]) != 881:
-                    if block:                        
-                        norm_text = cls._normalize_text(text[4], norm)
-                        if is_json:
-                            list_of_boxes.append((text[0], text[1], text[2],
-                                              text[3], norm_text))
-                        else:
-                            drawboxes_text += (norm_text + sep)    
+
+        concat = lambda box_list: [box for page in box_list for box in page]
+
+        last_id = -1
+        doc_boxes = np.array(concat(get_doc_text_boxes(pymu_file)), dtype='O')
+        doc_boxes = list(doc_boxes[doc_boxes[:, 7].argsort()])
+
+        for text in doc_boxes:
+            if int(text[1]) != 55 and int(text[1]) != 881:
+                if block:                        
+                    norm_text = cls._normalize_text(text[4], norm)
+                    if is_json:
+                        list_of_boxes.append((text[0], text[1], text[2],
+                                            text[3], norm_text))
                     else:
-                        drawboxes_text += (text[4] + sep)
+                        if last_id > 0 and last_id != text[7]: 
+                            drawboxes_text += sep    
+                        drawboxes_text += norm_text
+                else:
+                    if last_id > 0 and last_id != text[7]:  
+                        drawboxes_text +=  sep
+                    drawboxes_text += text[4]
+
+                last_id = text[7]
 
         if block:
             if not single:
@@ -148,6 +161,7 @@ class ContentExtractor:
 
         """
         content_dict = {}
+
         try:
             title_base = cls._extract_titles(file).json.keys()
         except Exception as e:
@@ -161,12 +175,14 @@ class ContentExtractor:
                 text = box[4]
                 for title in title_base:
                     title.replace("\n", "")
-                    if text == title:
+                    normalized_title = cls._normalize_text(title, norm)
+
+                    if text == normalized_title:
                         first_title = True
                         is_title = True
-                        actual_title = title
+                        actual_title = normalized_title
                         if title not in content_dict.keys():
-                            content_dict.update({title: []})
+                            content_dict.update({normalized_title: []})
                     else:
                         is_title = False
 
